@@ -238,11 +238,6 @@
             <div class="loader" id="loader"></div>
             <div class="error-message" id="errorMessage">IP tidak ditemukan atau tidak valid.</div>
 
-            <!-- VPN Warning Badge -->
-            <div id="vpnBadge" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; padding: 10px 15px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 20px; animation: fadeIn 0.3s ease;">
-                ⚠️ PENGGUNAAN VPN / PROXY TERDETEKSI
-            </div>
-
             <div class="result-container" id="resultContainer">
                 <div class="data-row">
                     <span class="label">IP Address</span>
@@ -310,13 +305,11 @@
             const resultContainer = document.getElementById('resultContainer');
             const mapContainer = document.getElementById('mapContainer');
             const errorMessage = document.getElementById('errorMessage');
-            const vpnBadge = document.getElementById('vpnBadge');
 
             // Reset UI State
             resultContainer.style.display = 'none';
             mapContainer.style.display = 'none';
             errorMessage.style.display = 'none';
-            vpnBadge.style.display = 'none';
             loader.style.display = 'block';
 
             try {
@@ -336,7 +329,6 @@
                             .then(text => {
                                 const vpnTextElement = document.getElementById('val-vpn');
                                 if (text.trim() === 'Y') {
-                                    vpnBadge.style.display = 'block';
                                     vpnTextElement.innerText = 'Terdeteksi (Ya)';
                                     vpnTextElement.style.color = '#ef4444'; // Merah
                                 } else {
