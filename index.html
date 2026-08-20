@@ -264,6 +264,10 @@
                     <span class="label">Timezone</span>
                     <span class="value" id="val-tz">-</span>
                 </div>
+                <div class="data-row">
+                    <span class="label">Status VPN/Proxy</span>
+                    <span class="value" id="val-vpn">Mengecek...</span>
+                </div>
             </div>
             
             <!-- Map Container -->
@@ -330,12 +334,19 @@
                         fetch(vpnCheckUrl)
                             .then(res => res.text())
                             .then(text => {
+                                const vpnTextElement = document.getElementById('val-vpn');
                                 if (text.trim() === 'Y') {
                                     vpnBadge.style.display = 'block';
+                                    vpnTextElement.innerText = 'Terdeteksi (Ya)';
+                                    vpnTextElement.style.color = '#ef4444'; // Merah
+                                } else {
+                                    vpnTextElement.innerText = 'Aman (Tidak)';
+                                    vpnTextElement.style.color = '#22c55e'; // Hijau
                                 }
                             });
                     } catch (e) {
                         console.error("VPN Check failed", e);
+                        document.getElementById('val-vpn').innerText = 'Gagal mengecek';
                     }
 
                     // Update data ke UI
