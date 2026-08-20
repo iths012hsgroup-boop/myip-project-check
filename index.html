@@ -270,20 +270,20 @@
             loader.style.display = 'block';
 
             try {
-                // Memanggil API gratis (Mendukung CORS sehingga bisa dipanggil langsung dari JS client-side)
-                const apiUrl = ip ? `http://ip-api.com/json/${ip}` : `http://ip-api.com/json/`;
+                // Menggunakan ipwho.is yang mendukung HTTPS secara gratis tanpa API Key
+                const apiUrl = ip ? `https://ipwho.is/${ip}` : `https://ipwho.is/`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
 
                 loader.style.display = 'none'; // Sembunyikan loader
 
-                if (data.status === 'success') {
+                if (data.success === true) {
                     // Update data ke UI
-                    document.getElementById('val-ip').innerText = data.query;
-                    document.getElementById('val-country').innerText = `${data.country} (${data.countryCode})`;
-                    document.getElementById('val-city').innerText = `${data.city}, ${data.regionName}`;
-                    document.getElementById('val-isp').innerText = data.isp;
-                    document.getElementById('val-tz').innerText = data.timezone;
+                    document.getElementById('val-ip').innerText = data.ip;
+                    document.getElementById('val-country').innerText = `${data.country} (${data.country_code})`;
+                    document.getElementById('val-city').innerText = `${data.city}, ${data.region}`;
+                    document.getElementById('val-isp').innerText = data.connection ? data.connection.isp : '-';
+                    document.getElementById('val-tz').innerText = data.timezone ? data.timezone.id : '-';
 
                     // Tampilkan container hasil dengan animasi
                     resultContainer.style.display = 'flex';
