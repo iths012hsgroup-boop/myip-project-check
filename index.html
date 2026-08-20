@@ -230,7 +230,10 @@
             <div class="header">
                 <img src="https://hsgplatform.com/assets/images/Logo_Xplay.png" alt="HsXplay Logo" style="max-width: 180px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));">
                 <h1>Detail Lokasi IP</h1>
-                <p id="ip-display" style="color: var(--accent); font-weight: 600; font-size: 1.1rem; margin-top: 5px;">Menganalisis IP...</p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 5px;">
+                    <p id="ip-display" style="color: var(--accent); font-weight: 600; font-size: 1.1rem; margin: 0;">Menganalisis IP...</p>
+                    <span id="connBadge" style="display: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; border: 1px solid var(--accent); color: var(--accent); background: rgba(56, 189, 248, 0.15);">...</span>
+                </div>
             </div>
 
 
@@ -341,9 +344,29 @@
                         document.getElementById('val-vpn').innerText = 'Gagal mengecek';
                     }
 
+                    // Cek Tipe Koneksi dari ISP (Deteksi Mobile/Broadband)
+                    const ispName = (data.connection ? data.connection.isp : '').toLowerCase();
+                    const connBadge = document.getElementById('connBadge');
+                    
+                    if (ispName.includes('selular') || ispName.includes('indosat') || ispName.includes('xl axiata') || ispName.includes('hutchison') || ispName.includes('smartfren') || ispName.includes('mobile') || ispName.includes('cellular')) {
+                        connBadge.innerHTML = '📱 Cellular';
+                        connBadge.style.borderColor = '#38bdf8'; // Biru Accent
+                        connBadge.style.color = '#38bdf8';
+                        connBadge.style.background = 'rgba(56, 189, 248, 0.15)';
+                    } else {
+                        connBadge.innerHTML = '💻 Broadband / WiFi';
+                        connBadge.style.borderColor = '#22c55e'; // Hijau
+                        connBadge.style.color = '#22c55e';
+                        connBadge.style.background = 'rgba(34, 197, 94, 0.15)';
+                    }
+                    connBadge.style.display = 'block';
+
                     // Update data ke UI
                     document.getElementById('val-ip').innerText = data.ip;
-                    document.getElementById('val-country').innerText = `${data.country} (${data.country_code})`;
+                    
+                    // Menambahkan Emoji Bendera
+                    const flagEmoji = data.flag ? data.flag.emoji : '';
+                    document.getElementById('val-country').innerText = `${flagEmoji} ${data.country} (${data.country_code})`;
                     document.getElementById('val-city').innerText = `${data.city}, ${data.region}`;
                     document.getElementById('val-isp').innerText = data.connection ? data.connection.isp : '-';
                     document.getElementById('val-tz').innerText = data.timezone ? data.timezone.id : '-';
