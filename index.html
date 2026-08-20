@@ -238,6 +238,11 @@
             <div class="loader" id="loader"></div>
             <div class="error-message" id="errorMessage">IP tidak ditemukan atau tidak valid.</div>
 
+            <!-- VPN Warning Badge -->
+            <div id="vpnBadge" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; padding: 10px 15px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 20px; animation: fadeIn 0.3s ease;">
+                ⚠️ PENGGUNAAN VPN / PROXY TERDETEKSI
+            </div>
+
             <div class="result-container" id="resultContainer">
                 <div class="data-row">
                     <span class="label">IP Address</span>
@@ -301,11 +306,13 @@
             const resultContainer = document.getElementById('resultContainer');
             const mapContainer = document.getElementById('mapContainer');
             const errorMessage = document.getElementById('errorMessage');
+            const vpnBadge = document.getElementById('vpnBadge');
 
             // Reset UI State
             resultContainer.style.display = 'none';
             mapContainer.style.display = 'none';
             errorMessage.style.display = 'none';
+            vpnBadge.style.display = 'none';
             loader.style.display = 'block';
 
             try {
@@ -317,6 +324,20 @@
                 loader.style.display = 'none'; // Sembunyikan loader
 
                 if (data.success === true) {
+                    // Cek VPN secara paralel tanpa mengganggu proses utama
+                    try {
+                        const vpnCheckUrl = `https://blackbox.ipinfo.app/lookup/${data.ip}`;
+                        fetch(vpnCheckUrl)
+                            .then(res => res.text())
+                            .then(text => {
+                                if (text.trim() === 'Y') {
+                                    vpnBadge.style.display = 'block';
+                                }
+                            });
+                    } catch (e) {
+                        console.error("VPN Check failed", e);
+                    }
+
                     // Update data ke UI
                     document.getElementById('val-ip').innerText = data.ip;
                     document.getElementById('val-country').innerText = `${data.country} (${data.country_code})`;
