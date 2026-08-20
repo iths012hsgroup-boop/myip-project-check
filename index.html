@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IP Tracker Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS & JS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -208,13 +211,15 @@
             animation: fadeIn 0.4s ease forwards;
             animation-delay: 0.2s; /* Muncul setelah detail data */
             opacity: 0;
+            z-index: 1; /* Supaya map tetap di dalam batas card */
         }
 
-        .map-container iframe {
+        #map {
             width: 100%;
             height: 100%;
-            border: none;
-            filter: invert(90%) hue-rotate(180deg) contrast(100%); /* Membuat peta menjadi dark mode */
+            background-color: transparent;
+            /* Filter dark mode diletakkan di layer peta saja via JS, atau di sini */
+            filter: invert(90%) hue-rotate(180deg) contrast(100%);
         }
     </style>
 </head>
@@ -257,12 +262,16 @@
             
             <!-- Map Container -->
             <div class="map-container" id="mapContainer">
-                <iframe id="mapFrame" src="" allowfullscreen="" loading="lazy"></iframe>
+                <div id="map"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Variabel global untuk menyimpan instance peta
+        let mapInstance = null;
+        let mapMarker = null;
+
         // Fungsi untuk mengambil parameter dari URL (misal: index.html?ip=8.8.8.8)
         function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -317,14 +326,31 @@
                     // Tampilkan container hasil dengan animasi
                     resultContainer.style.display = 'flex';
                     
-                    // Render Map (Google Maps Embed)
+                    // Render Map (Interactive dengan Leaflet.js)
                     if (data.latitude && data.longitude) {
                         const lat = data.latitude;
                         const lon = data.longitude;
-                        // URL Embed Google Maps. Menggunakan parameter 'q' untuk pin lokasi
-                        const mapUrl = `https://maps.google.com/maps?q=${lat},${lon}&z=14&output=embed`;
-                        document.getElementById('mapFrame').src = mapUrl;
+                        
                         mapContainer.style.display = 'block';
+
+                        // Inisialisasi peta jika belum ada, atau update posisi jika sudah ada
+                        if (!mapInstance) {
+                            mapInstance = L.map('map').setView([lat, lon], 14);
+                            
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; OpenStreetMap'
+                            }).addTo(mapInstance);
+
+                            mapMarker = L.marker([lat, lon]).addTo(mapInstance);
+                        } else {
+                            mapInstance.setView([lat, lon], 14);
+                            mapMarker.setLatLng([lat, lon]);
+                        }
+                        
+                        // Perbaiki ukuran peta setelah div ditampilkan
+                        setTimeout(() => {
+                            mapInstance.invalidateSize();
+                        }, 100);
                     }
                 } else {
                     errorMessage.style.display = 'block';
