@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Tracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, #0f172a 80%);
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px var(--accent-glow);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .search-box button {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 0 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--accent);
+            background: #7dd3fc;
+        }
+
+        .result-container {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 15px;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .data-row:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .value {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #fff;
+            text-align: right;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            display: none;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Detail Lokasi IP</h1>
+                <p id="ip-display" style="color: var(--accent); font-weight: 600; font-size: 1.1rem; margin-top: 5px;">Menganalisis IP...</p>
+            </div>
+
+
+
+            <div class="loader" id="loader"></div>
+            <div class="error-message" id="errorMessage">IP tidak ditemukan atau tidak valid.</div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="data-row">
+                    <span class="label">IP Address</span>
+                    <span class="value" id="val-ip">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Negara</span>
+                    <span class="value" id="val-country">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Kota / Region</span>
+                    <span class="value" id="val-city">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Provider (ISP)</span>
+                    <span class="value" id="val-isp">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Timezone</span>
+                    <span class="value" id="val-tz">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk mengambil parameter dari URL (misal: index.html?ip=8.8.8.8)
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Ambil IP dari URL saat pop-up / halaman terbuka
+        window.onload = () => {
+            const ipFromUrl = getQueryParam('ip');
+            
+            if (ipFromUrl) {
+                document.getElementById('ip-display').innerText = ipFromUrl;
+                searchIp(ipFromUrl); // Langsung lacak
+            } else {
+                document.getElementById('ip-display').innerText = "IP Tidak Ditemukan";
+                document.getElementById('errorMessage').innerText = "Parameter IP tidak ditemukan. (Contoh penggunaan: ?ip=8.8.8.8)";
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        };
+
+        // Fungsi utama untuk mengambil data IP
+        async function searchIp(ip) {
+            
+            // Referensi elemen UI
+            const loader = document.getElementById('loader');
+            const resultContainer = document.getElementById('resultContainer');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Reset UI State
+            resultContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                // Memanggil API gratis (Mendukung CORS sehingga bisa dipanggil langsung dari JS client-side)
+                const apiUrl = ip ? `http://ip-api.com/json/${ip}` : `http://ip-api.com/json/`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                loader.style.display = 'none'; // Sembunyikan loader
+
+                if (data.status === 'success') {
+                    // Update data ke UI
+                    document.getElementById('val-ip').innerText = data.query;
+                    document.getElementById('val-country').innerText = `${data.country} (${data.countryCode})`;
+                    document.getElementById('val-city').innerText = `${data.city}, ${data.regionName}`;
+                    document.getElementById('val-isp').innerText = data.isp;
+                    document.getElementById('val-tz').innerText = data.timezone;
+
+                    // Tampilkan container hasil dengan animasi
+                    resultContainer.style.display = 'flex';
+                } else {
+                    errorMessage.style.display = 'block';
+                    errorMessage.innerText = 'Gagal melacak IP. Pastikan format benar.';
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.innerText = 'Terjadi kesalahan jaringan. Coba lagi.';
+                console.error(error);
+            }
+        }
+        
+
+    </script>
+</body>
+</html>
